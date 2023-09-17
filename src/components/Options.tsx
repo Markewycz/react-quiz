@@ -1,3 +1,5 @@
+import { Action, ActionTypes } from './App';
+
 interface OptionsProps {
   question: {
     correctOption: number;
@@ -5,6 +7,8 @@ interface OptionsProps {
     points: number;
     question: string;
   };
+  dispatch: React.Dispatch<Action>;
+  answer: null | number;
 }
 
 export default function Options({ question, dispatch, answer }: OptionsProps) {
@@ -23,7 +27,9 @@ export default function Options({ question, dispatch, answer }: OptionsProps) {
                 : 'wrong'
               : ''
           }`}
-          onClick={() => dispatch({ type: 'newAnswer', payload: index })}
+          onClick={() =>
+            dispatch({ type: ActionTypes.NewAnswer, payload: index })
+          }
         >
           {option}
         </button>

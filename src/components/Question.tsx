@@ -1,3 +1,4 @@
+import { Action } from './App';
 import Options from './Options';
 
 export interface QuestionProps {
@@ -7,6 +8,8 @@ export interface QuestionProps {
     points: number;
     question: string;
   };
+  dispatch: React.Dispatch<Action>;
+  answer: null | number;
 }
 
 export default function Question({

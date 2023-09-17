@@ -1,9 +1,18 @@
+import { Action, ActionTypes } from './App';
+
+type FinishedScreenProps = {
+  points: number;
+  maxPossiblePoints: number;
+  highscore: number;
+  dispatch: React.Dispatch<Action>;
+};
+
 export default function FinishedScreen({
   points,
   maxPossiblePoints,
   highscore,
   dispatch,
-}) {
+}: FinishedScreenProps) {
   const percentage = (points / maxPossiblePoints) * 100;
 
   let emoji;
@@ -25,7 +34,7 @@ export default function FinishedScreen({
 
       <button
         className="btn btn-ui"
-        onClick={() => dispatch({ type: 'restart' })}
+        onClick={() => dispatch({ type: ActionTypes.Restart })}
       >
         Reset quiz
       </button>

@@ -1,10 +1,18 @@
+type ProgressProps = {
+  index: number;
+  numQuestions: number;
+  points: number;
+  maxPossiblePoints: number;
+  answer: null | number;
+};
+
 export default function Progress({
   index,
   numQuestions,
   points,
   maxPossiblePoints,
   answer,
-}) {
+}: ProgressProps) {
   return (
     <header className="progress">
       <progress

@@ -2,7 +2,6 @@ import { useEffect, useReducer } from 'react';
 import Header from './Header';
 import MainContent from './MainContent';
 import Loader from './Loader';
-import Error from './Error';
 import StartScreen from './StartScreen';
 import Question from './Question';
 import NextButton from './NextButton';
@@ -10,6 +9,7 @@ import Progress from './Progress';
 import FinishedScreen from './FinishedScreen';
 import Timer from './Timer';
 import Footer from './Footer';
+import ErrorMsg from './ErrorMsg';
 
 const SECS_PER_QUESTION = 30;
 
@@ -24,42 +24,41 @@ type State = {
   questions: Question[];
   status: 'ready' | 'error' | 'loading' | 'active' | 'finished';
   index: number;
-  answer: null;
+  answer: number | null;
   points: number;
+  highscore: number;
+  secondsRemaining: number;
 };
 
+export enum ActionTypes {
+  DataReceived = 'dataReceived',
+  DataFailed = 'dataFailed',
+  Start = 'start',
+  NewAnswer = 'newAnswer',
+  NextQuestion = 'nextQuestion',
+  Finish = 'finish',
+  Restart = 'restart',
+  Tick = 'tick',
+}
+
 export type Action =
-  | {
-      type: 'dataReceived';
-      payload: Question[];
-    }
-  | {
-      type: 'dataFailed';
-    }
-  | {
-      type: 'unknown';
-    }
-  | {
-      type: 'start';
-    }
-  | {
-      type: 'newAnswer';
-      payload: null;
-    }
-  | {
-      type: 'nextQuestion';
-    };
+  | { type: ActionTypes.DataReceived; payload: Question[] }
+  | { type: ActionTypes.DataFailed }
+  | { type: ActionTypes.Start }
+  | { type: ActionTypes.NewAnswer; payload: number }
+  | { type: ActionTypes.NextQuestion }
+  | { type: ActionTypes.Finish }
+  | { type: ActionTypes.Restart }
+  | { type: ActionTypes.Tick };
 
 const initialState: State = {
   questions: [],
-
-  // "loading", "error", "ready", "active", "finished"
   status: 'loading',
   index: 0,
   answer: null,
   points: 0,
   highscore: 0,
-  secondsRemaining: null,
+  secondsRemaining: 0,
 };
 
 function reducer(state: State, action: Action): State {
@@ -81,18 +80,18 @@ function reducer(state: State, action: Action): State {
         status: 'active',
         secondsRemaining: state.questions.length * SECS_PER_QUESTION,
       };
-    case 'newAnswer':
-      // eslint-disable-next-line no-case-declarations
-      const question = state.questions.at(state.index);
+    case 'newAnswer': {
+      const question = state.questions[state.index];
 
       return {
         ...state,
         answer: action.payload,
         points:
-          action.payload === question.correctOption
-            ? state.points + question.points
+          action.payload === question?.correctOption
+            ? state.points + question?.points
             : state.points,
       };
+    }
     case 'nextQuestion':
       return {
         ...state,
@@ -121,11 +120,11 @@ function reducer(state: State, action: Action): State {
     case 'tick':
       return {
         ...state,
-        secondsRemaining: state.secondsRemaining - 1,
+        secondsRemaining: state.secondsRemaining && state.secondsRemaining - 1,
         status: state.secondsRemaining === 0 ? 'finished' : state.status,
       };
     default:
-      throw new Error('Action unknown');
+      throw new Error('Unknown action');
   }
 }
 
@@ -144,9 +143,9 @@ function App() {
   useEffect(function () {
     fetch('http://localhost:8000/questions')
       .then(res => res.json())
-      .then(data => dispatch({ type: 'dataReceived', payload: data }))
+      .then(data => dispatch({ type: ActionTypes.DataReceived, payload: data }))
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch(_err => dispatch({ type: 'dataFailed' }));
+      .catch(_err => dispatch({ type: ActionTypes.DataFailed }));
   }, []);
 
   return (
@@ -154,7 +153,7 @@ function App() {
       <Header />
       <MainContent>
         {status === 'loading' && <Loader />}
-        {status === 'error' && <Error />}
+        {status === 'error' && <ErrorMsg />}
         {status === 'ready' && (
           <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
         )}
