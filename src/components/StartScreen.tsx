@@ -1,4 +1,4 @@
-import { Action } from './App';
+import { Action, ActionTypes } from './App';
 
 interface StartScreenProps {
   numQuestions: number;
@@ -15,7 +15,7 @@ export default function StartScreen({
       <h3>{numQuestions} question to test your React mastery</h3>
       <button
         className="btn btn-ui"
-        onClick={() => dispatch({ type: 'start' })}
+        onClick={() => dispatch({ type: ActionTypes.Start })}
       >
         Let's start
       </button>
